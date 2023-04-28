@@ -34,7 +34,9 @@ namespace Tools.ObjectVisible
         private void OnGUI()
         {
 
-            var gameObjects = Selection.gameObjects.Where(go => go.TryGetComponent(out Renderer renderer)).ToArray();
+            List<IGameObjectView> gameObjects = Selection.gameObjects
+                .Where(go => go.TryGetComponent(out GameObjectInEditorView gameObject))
+                .Select(go => go.GetComponent<IGameObjectView>()).ToList();
             if (gameObjects == null || gameObjects.Count() == 0)
             {
                 cashRenrerers.Clear();
@@ -47,7 +49,7 @@ namespace Tools.ObjectVisible
                 Debug.Log("Change selected objects");
                 cashRenrerers?.Clear();
                 foreach (var gameObject in gameObjects)
-                    cashRenrerers.Add(new GameObjectSlotModel(gameObject.GetComponent<Renderer>()));
+                    cashRenrerers.Add(new GameObjectSlotModel(gameObject.Name, gameObject.Name));
             }
 
             GUILayout.BeginHorizontal();
@@ -65,12 +67,12 @@ namespace Tools.ObjectVisible
                         if (GUILayout.Button(isVisible ? showEye.texture : hideEye.texture, GUILayout.Width(20), GUILayout.Height(20)))
                         {
                             isVisible = !isVisible;
-                            SetVisible(isVisible, cashRenrerers.ToArray());
+                            SetVisible(gameObjects, cashRenrerers);
                         }
                         if (GUILayout.Button(isSelected ? checkBoxEnable.texture : checkBoxDisable.texture, GUILayout.Width(20), GUILayout.Height(20)))
                         {
                             isSelected = !isSelected;
-                            SetSelected(isSelected, cashRenrerers.ToArray());
+                            SetSelected(cashRenrerers);
                         }
                     }
                     GUILayout.EndHorizontal();
@@ -86,15 +88,15 @@ namespace Tools.ObjectVisible
             {
                 GUILayout.BeginArea(new Rect(0, 60, Screen.width, cashRenrerers.Count * 30));
                 {
-                    PaintGameObjectSlots();
+                    PaintGameObjectSlots(gameObjects);
                 }
                 GUILayout.EndArea();
             }
 
-            SetAlpha(cashRenrerers);
+            SetAlpha(gameObjects, cashRenrerers);
         }
 
-        private void PaintGameObjectSlots()
+        private void PaintGameObjectSlots(List<IGameObjectView> slotView)
         {
             for (int i = 0; i < cashRenrerers.Count; i++)
             {
@@ -108,38 +110,45 @@ namespace Tools.ObjectVisible
                 if (Button(new Rect(Screen.width - 3 - 20, 30 * i + 3, 20, 20), cashRenrerers[i].IsVisible ? showEye.texture : hideEye.texture)) //new Texture2D(25, 25)
                 {
                     cashRenrerers[i].ChangeVisible();
+                    slotView[i].SetVisible(cashRenrerers[i].IsVisible);
                 }
             }
         }
 
-        private void SetAlpha(List<ISlotModel> slots)
+        private void SetAlpha(List<IGameObjectView> slotView, List<ISlotModel> slots)
         {
-            foreach (var slot in slots)
-                if (slot.IsSelected)
-                    slot.SetAlpha(alpha);
+            for (int i = 0; i < slots.Count; i++)
+                if (slots[i].IsSelected)
+                {
+                    slots[i].SetAlpha(alpha);
+                    slotView[i].SetAlpha(alpha);
+                }
         }
 
-        private void SetVisible(bool isVisible, params ISlotModel[] slots)
+        private void SetVisible(List<IGameObjectView> slotView, List<ISlotModel> slots)
         {
-            foreach (var slot in slots)
-                if (slot.IsVisible != isVisible)
-                    slot.ChangeVisible();
+            for (int i = 0; i < slots.Count; i++)
+                if (slots[i].IsVisible != isVisible)
+                {
+                    slots[i].ChangeVisible();
+                    slotView[i].SetVisible(slots[i].IsVisible);
+                }
         }
 
-        private void SetSelected(bool isSelected, params ISlotModel[] slots)
+        private void SetSelected(List<ISlotModel> slots)
         {
             foreach (var slot in slots)
                 if (slot.IsSelected != isSelected)
                     slot.ChangeSelect();
         }
 
-        private bool IsChangedSelectedList(GameObject[] gameObjects)
+        private bool IsChangedSelectedList(List<IGameObjectView> gameObjects)
         {
             if (cashRenrerers == null && gameObjects != null) return true;
-            if (cashRenrerers.Count != gameObjects.Length) return true;
+            if (cashRenrerers.Count != gameObjects.Count) return true;
 
             for (int i = 0; i < cashRenrerers.Count; i++)
-                if (!cashRenrerers[i].Equals(gameObjects[i]))
+                if (!cashRenrerers[i].Equals(gameObjects[i].Name))
                     return true;
 
             return false;
