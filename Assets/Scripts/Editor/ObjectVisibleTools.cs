@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -49,7 +50,7 @@ namespace Tools.ObjectVisible
                 Debug.Log("Change selected objects");
                 cashRenrerers?.Clear();
                 foreach (var gameObject in gameObjects)
-                    cashRenrerers.Add(new GameObjectSlotModel(gameObject.Name, gameObject.Name));
+                    cashRenrerers.Add(new GameObjectSlotModel(Guid.NewGuid(), gameObject.Name));
             }
 
             GUILayout.BeginHorizontal();

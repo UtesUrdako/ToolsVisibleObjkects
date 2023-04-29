@@ -1,6 +1,10 @@
-﻿public interface IGameObjectView
+﻿namespace Tools.ObjectVisible
 {
-    string Name { get; }
-    void SetAlpha(float alpha);
-    void SetVisible(bool value);
+    public interface IGameObjectView
+    {
+        string Name { get; }
+        void Initialize(ISlotModel model);
+        void SetAlpha(float alpha);
+        void SetVisible(bool value);
+    }
 }
