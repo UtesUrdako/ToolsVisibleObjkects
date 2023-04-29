@@ -19,32 +19,12 @@ namespace Tools.ObjectVisible
         [SerializeField] private Toggle visibleAllButton;
         [SerializeField] private Slider alphaSlider;
 
-        [SerializeField] private ObjectToolsSlot slotPrefab;
-
         private float widthPanel;
 
-        private void Awake()
+        public Transform Context => context;
+
+        public void Initialize(IObjectVisibleController controller)
         {
-            IObjectVisibleController controller = new ObjectVisibleController();
-            var renderers = FindObjectsOfType<Renderer>();
-
-            foreach (var renderer in renderers)
-            {
-                Guid id = Guid.NewGuid();
-
-                IGameObjectView gameObjectView;
-                if (!renderer.gameObject.TryGetComponent(out GameObjectInGameView view))
-                    gameObjectView = renderer.gameObject.AddComponent<GameObjectInGameView>();
-                else
-                    gameObjectView = view;
-                ObjectToolsSlot slot = Instantiate(slotPrefab, context);
-                ISlotModel slotModel = new GameObjectSlotModel(id, gameObjectView.Name);
-
-                gameObjectView.Initialize(slotModel);
-                slot.Initialize(id, slotModel, controller);
-                controller.AddModel(slotModel);
-            }
-
             widthPanel = mainPanel.sizeDelta.x;
             StartCoroutine(ClosePanel());
 
@@ -64,7 +44,7 @@ namespace Tools.ObjectVisible
             visibleAllButton.isOn = isVisible;
         }
 
-        private void OnActivatePanel()
+        public void OnActivatePanel()
         {
             if (mainPanel.gameObject.activeSelf)
                 StartCoroutine(ClosePanel());
