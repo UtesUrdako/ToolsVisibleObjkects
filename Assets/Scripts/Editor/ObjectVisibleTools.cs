@@ -148,10 +148,6 @@ namespace Tools.ObjectVisible
             if (cashRenrerers == null && gameObjects != null) return true;
             if (cashRenrerers.Count != gameObjects.Count) return true;
 
-            for (int i = 0; i < cashRenrerers.Count; i++)
-                if (!cashRenrerers[i].Equals(gameObjects[i].Name))
-                    return true;
-
             return false;
         }
     }

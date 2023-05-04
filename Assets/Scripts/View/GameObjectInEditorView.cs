@@ -24,10 +24,12 @@ namespace Tools.ObjectVisible
 
         public void SetVisible(bool value)
         {
+#if UNITY_EDITOR
             if (value)
                 SceneVisibilityManager.instance.Show(renderer.gameObject, true);
             else
                 SceneVisibilityManager.instance.Hide(renderer.gameObject, true);
+#endif
         }
     }
 }
